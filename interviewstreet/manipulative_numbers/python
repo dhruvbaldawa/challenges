@@ -1,0 +1,33 @@
+721954051 807680016 4 512 8388608 268443650 68075584 2097152 152601090 806561600 537020416 44732164 37749268 36044820 2113548 67371136 53515403 136908920 169877522 66576 16384 70145 352616448 50599978 17825792 71666440 589824 48768001 12913408 524288import itertools
+import logging
+import sys
+import math
+from collections import deque
+
+xor = lambda x: x[0] ^ x[1]
+def main():
+    data = sys.stdin.read().splitlines()
+    #data = open("input01.txt").read().splitlines()
+    A = map(int, data[1].split())
+    A = deque(A)
+    logging.debug('A=%s' % A)
+    K = 0
+    for B in itertools.permutations(A):
+        #logging.debug("%s" % B)
+        B1 = list(B)
+        B1.append(B1.pop(0))
+
+        M_B = min(map(xor, zip(B, B1)))
+        if M_B > K:
+            K = M_B
+
+    k = int(math.log(K, 2))
+    if k > 0:
+        print k
+    else:
+        print '-1'
+
+
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG)
+    main()
