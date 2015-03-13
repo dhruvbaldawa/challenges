@@ -41,6 +41,17 @@ Note: "" marks the limit of string and not meant to be parsed.
 #include <string.h>
 
 #define STACK_SIZE 256
+#define BUFFER_SIZE 256
+char const* OPERATORS = "(*/+-)";
+
+enum op_enum {
+    OPEN_BRACKET,
+    MULTIPLY,
+    DIVIDE,
+    ADD,
+    SUBTRACT,
+    CLOSE_BRACKET,
+};
 
 typedef struct stack_struct {
     int top;
@@ -68,7 +79,12 @@ int stack_pop(stack_t* s) {
     }
 }
 
-int stack_empty(stack_t* s) {
+int stack_peek(stack_t* s) {
+    // @TODO: empty constraint checking
+    return s->elements[s->top];
+}
+
+int stack_isempty(stack_t* s) {
     return s->top == -1;
 };
 
@@ -81,13 +97,16 @@ void stack_print(stack_t* s) {
 
 int main(int argc, char* argv[]) {
     char* instring = argv[1];
+    char* output_buffer;
+    output_buffer = (char *)malloc(BUFFER_SIZE);
     // to make sure that the result has something useful
     int result_flag = 0;
     // the current result value
     int result = 0;
     // create stack and initialize all its variables
-    stack_t s;
-    stack_init(&s);
+    stack_t num_stack, op_stack;
+    stack_init(&num_stack);
+    stack_init(&op_stack);
 
     int i = 0;
     while (1) {
@@ -101,21 +120,46 @@ int main(int argc, char* argv[]) {
         } else {
             // put any existing result into the stack
             if (result_flag) {
-                stack_push(&s, result);
+                sprintf(output_buffer, "%s %d", output_buffer, result);
+                result_flag = false;
                 result = 0;
-                result_flag = 0;
             }
-
+            int op = -1;
             switch(inchar) {
                 case '/':
-                case '*':
-                case '+':
-                case '-':
-                    // @TODO: checks for empty stack
-                    int a = stack_pop(&s);
-                    int b = stack_pop(&s);
-                    printf("%d %d %c", a, b, inchar);
+                    op = DIVIDE;
                     break;
+                case '*':
+                    op = MULTIPLY;
+                    break;
+                case '+':
+                    op = ADD;
+                    break;
+                case '-':
+                    op = SUBTRACT;
+                    break;
+                case '(':
+                    op = OPEN_BRACKET;
+                    break;
+                case ')':
+                    op = CLOSE_BRACKET;
+                    break;
+            }
+
+            // if the character was an operator
+            if (op != -1) {
+                if (stack_isempty(&op_stack)) {
+                    stack_push(&op_stack, op);
+                } else {
+                    int current_top = stack_peek(&op_stack);
+
+                    // if current top is of higher precedence
+                    if (op > current_top) {
+                        sprintf(output_buffer, "%s %c", output_buffer,
+                                OPERATORS[stack_pop(&op_stack)]);
+                    }
+                    stack_push(&op_stack, op);
+                }
             }
         }
 
@@ -126,6 +170,12 @@ int main(int argc, char* argv[]) {
         i++;
     }
 
-    stack_print(&s);
+    while (!stack_isempty(&op_stack)) {
+        sprintf(output_buffer, "%s %c", output_buffer, OPERATORS[stack_pop(&op_stack)]);
+    }
+
+    printf("\n Output: %s \n", output_buffer);
+    stack_print(&op_stack);
+    free(output_buffer);
     return 0;
 }
