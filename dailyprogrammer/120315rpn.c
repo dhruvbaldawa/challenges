@@ -42,6 +42,8 @@ Note: "" marks the limit of string and not meant to be parsed.
 
 #define STACK_SIZE 256
 #define BUFFER_SIZE 256
+#define TRUE 1
+#define FALSE 0
 char const* OPERATORS = "(*/+-)";
 
 enum op_enum {
@@ -64,7 +66,7 @@ void stack_init(stack_t* s) {
 
 int stack_push(stack_t* s, int el) {
     if (s->top == STACK_SIZE) {
-        return 0;
+        return FALSE;
     } else {
         s->elements[++s->top] = el;
         return 1;
@@ -103,7 +105,7 @@ int main(int argc, char* argv[]) {
     char* instring = argv[1];
     char output_buffer[BUFFER_SIZE] = "";
     // to make sure that the result has something useful
-    int result_flag = 0;
+    int result_flag = FALSE;
     // the current result value
     int result = 0;
     // create stack and initialize all its variables
@@ -116,14 +118,14 @@ int main(int argc, char* argv[]) {
         char inchar = instring[i];
 
         if (isdigit(instring[i])) {
-            result_flag = 1;
+            result_flag = TRUE;
             int value = atoi(&inchar);
             result = result * 10 + value;
         } else {
             // put any existing result into the stack
             if (result_flag) {
                 sprintf(output_buffer, "%s %d", output_buffer, result);
-                result_flag = false;
+                result_flag = FALSE;
                 result = 0;
             }
             int op = -1;
