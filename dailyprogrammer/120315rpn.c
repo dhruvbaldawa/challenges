@@ -95,6 +95,10 @@ void stack_print(stack_t* s) {
     }
 }
 
+int can_be_printed(int op) {
+    return (op != OPEN_BRACKET && op != CLOSE_BRACKET);
+}
+
 int main(int argc, char* argv[]) {
     char* instring = argv[1];
     char* output_buffer;
@@ -111,7 +115,6 @@ int main(int argc, char* argv[]) {
     int i = 0;
     while (1) {
         char inchar = instring[i];
-        printf("%c", inchar);
 
         if (isdigit(instring[i])) {
             result_flag = 1;
@@ -152,11 +155,13 @@ int main(int argc, char* argv[]) {
                     stack_push(&op_stack, op);
                 } else {
                     int current_top = stack_peek(&op_stack);
-
                     // if current top is of higher precedence
                     if (op > current_top) {
-                        sprintf(output_buffer, "%s %c", output_buffer,
-                                OPERATORS[stack_pop(&op_stack)]);
+                        int stack_top = stack_pop(&op_stack);
+                        if (can_be_printed(stack_top)) {
+                            sprintf(output_buffer, "%s %c", output_buffer,
+                                    OPERATORS[stack_top]);
+                        }
                     }
                     stack_push(&op_stack, op);
                 }
@@ -171,11 +176,13 @@ int main(int argc, char* argv[]) {
     }
 
     while (!stack_isempty(&op_stack)) {
-        sprintf(output_buffer, "%s %c", output_buffer, OPERATORS[stack_pop(&op_stack)]);
+        int stack_top = stack_pop(&op_stack);
+        if (can_be_printed(stack_top)) {
+            sprintf(output_buffer, "%s %c", output_buffer, OPERATORS[stack_top]);
+        }
     }
 
-    printf("\n Output: %s \n", output_buffer);
-    stack_print(&op_stack);
+    printf("%s\n", output_buffer);
     free(output_buffer);
     return 0;
 }
