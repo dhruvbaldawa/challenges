@@ -101,8 +101,7 @@ int can_be_printed(int op) {
 
 int main(int argc, char* argv[]) {
     char* instring = argv[1];
-    char* output_buffer;
-    output_buffer = (char *)malloc(BUFFER_SIZE);
+    char output_buffer[BUFFER_SIZE] = "";
     // to make sure that the result has something useful
     int result_flag = 0;
     // the current result value
@@ -183,6 +182,5 @@ int main(int argc, char* argv[]) {
     }
 
     printf("%s\n", output_buffer);
-    free(output_buffer);
     return 0;
 }
